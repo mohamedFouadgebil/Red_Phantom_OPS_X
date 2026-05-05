@@ -17,10 +17,10 @@ async function signup() {
     email: email.value,
     password: password.value,
     confirmPassword: confirmPassword.value,
-    age: age.value,
+    age: Number(age.value),
     phone: phone.value,
     role: role.value,
-    gender: document.querySelector("input[name='gender']:checked")?.value,
+    gender: document.querySelector("input[name='gender']:checked").value,
   };
 
   try {
@@ -32,38 +32,40 @@ async function signup() {
 
     const result = await res.json();
 
-    if (res.ok) {
-      localStorage.setItem("email", data.email);
-      location.href = "verify-email.html";
-    } else {
+    if (!res.ok) {
       alert(result.message || "Signup failed");
+      return;
     }
+
+    localStorage.setItem("email", data.email);
+    location.href = "verify-email.html";
   } catch (err) {
     alert("Server error");
   }
 }
 
 async function verifyEmail() {
-  const email = localStorage.getItem("email");
+  const emailStored = localStorage.getItem("email");
 
   try {
     const res = await fetch(`${API}/verify-email`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email,
+        email: emailStored,
         otp: otp.value,
       }),
     });
 
     const result = await res.json();
 
-    if (res.ok) {
-      localStorage.removeItem("email");
-      location.href = "login.html";
-    } else {
+    if (!res.ok) {
       alert(result.message || "Invalid OTP");
+      return;
     }
+
+    localStorage.removeItem("email");
+    location.href = "login.html";
   } catch (err) {
     alert("Server error");
   }
@@ -82,12 +84,13 @@ async function login() {
 
     const data = await res.json();
 
-    if (res.ok) {
-      localStorage.setItem("token", data.token);
-      location.href = "../../../main page/main.html";
-    } else {
+    if (!res.ok) {
       alert(data.message || "Login failed");
+      return;
     }
+
+    localStorage.setItem("token", data.token);
+    location.href = "../../../main page/main.html";
   } catch (err) {
     alert("Server error");
   }
